@@ -45,7 +45,7 @@ export default function AuthSetup() {
         <p className="text-gray-500 mb-8 text-sm">请使用 Google Authenticator 或 Microsoft Authenticator 扫描下方二维码</p>
 
         {qrCode && (
-          <div className="mb-8 p-4 bg-gray-50 rounded-xl inline-block">
+          <div className="mb-8 p-4 bg-gray-50 rounded-xl mx-auto flex flex-col items-center">
             <img src={`data:image/png;base64,${qrCode}`} alt="2FA QR Code" className="w-48 h-48" />
             <p className="mt-4 text-xs font-mono text-gray-400">密钥: {secret}</p>
           </div>

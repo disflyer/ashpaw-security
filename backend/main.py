@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Depends, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import Session, select
 from typing import List
 from models import Application, UserAuth, create_db_and_tables, get_session, engine
@@ -6,6 +7,15 @@ from totp import generate_totp_secret, get_totp_uri, verify_totp_code, generate_
 from pydantic import BaseModel
 
 app = FastAPI(title="Ashpaw 2FA Service")
+
+# 配置 CORS 中间件
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:3000"],  # 前端开发服务器地址
+    allow_credentials=True,
+    allow_methods=["*"],  # 允许所有 HTTP 方法
+    allow_headers=["*"],  # 允许所有请求头
+)
 
 @app.on_event("startup")
 def on_startup():
