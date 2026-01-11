@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+sqlmodel
+pyotp
+qrcode
+python-multipart
+python-jose[cryptography]
+passlib[bcrypt]
+cors
