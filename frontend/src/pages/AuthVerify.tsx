@@ -1,18 +1,31 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import api from '../api';
-import { LockKeyhole, CheckCircle2 } from 'lucide-react';
+import { LockKeyhole, CheckCircle2, ArrowRight } from 'lucide-react';
 
 export default function AuthVerify() {
   const { appId, userId } = useParams();
   const [code, setCode] = useState('');
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [errorMsg, setErrorMsg] = useState('');
+  const [redirectUrl, setRedirectUrl] = useState<string | null>(null);
+  const [countdown, setCountdown] = useState(3);
+
+  useEffect(() => {
+    let timer: any;
+    if (status === 'success' && redirectUrl && countdown > 0) {
+      timer = setTimeout(() => setCountdown(c => c - 1), 1000);
+    } else if (status === 'success' && redirectUrl && countdown === 0) {
+      window.location.href = redirectUrl;
+    }
+    return () => clearTimeout(timer);
+  }, [status, redirectUrl, countdown]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await api.post(`/auth/verify/${appId}/${userId}`, { code });
+      const res = await api.post(`/auth/verify/${appId}/${userId}`, { code });
+      setRedirectUrl(res.data.redirect_url);
       setStatus('success');
     } catch (err: any) {
       setStatus('error');
@@ -26,8 +39,23 @@ export default function AuthVerify() {
         <div className="bg-white p-8 rounded-2xl shadow-xl text-center max-w-sm w-full">
           <CheckCircle2 className="text-green-500 mx-auto mb-4" size={64} />
           <h2 className="text-2xl font-bold mb-2">验证成功</h2>
-          <p className="text-gray-500 mb-6">正在跳转回原系统...</p>
-          <button className="bg-gray-100 text-gray-800 px-6 py-2 rounded-lg font-medium">手动返回</button>
+          
+          {redirectUrl ? (
+            <div>
+              <p className="text-gray-500 mb-6">正在跳转回原系统 ({countdown}s)...</p>
+              <a 
+                href={redirectUrl}
+                className="inline-flex items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-lg font-medium hover:bg-blue-700 transition"
+              >
+                立即跳转 <ArrowRight size={16} />
+              </a>
+            </div>
+          ) : (
+            <div>
+              <p className="text-gray-500 mb-6">您可以关闭此页面了。</p>
+              <button className="bg-gray-100 text-gray-800 px-6 py-2 rounded-lg font-medium">关闭</button>
+            </div>
+          )}
         </div>
       </div>
     );
